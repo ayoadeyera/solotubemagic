@@ -1,0 +1,8 @@
+{
+  "name": "TubeMagic Hub",
+  "description": "A comprehensive AI-powered workstation for YouTube creators featuring high-retention script writing, keyword research, thumbnail generation, and channel optimization tools.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
