@@ -11,38 +11,30 @@ st.set_page_config(
 )
 
 # 2. Key Handling via Streamlit Secrets
-# Please add your key to the Streamlit Cloud Dashboard under 'Secrets'
-# API_KEY = "your_key_here"
 api_key = st.secrets.get("API_KEY", "")
 
 def serve_app():
     try:
+        # Instead of st.components.v1.html(string), we use declare_component(path=".")
+        # This tells Streamlit to serve the current directory as a static file server.
+        # This fixes the 404 errors for index.tsx and other module files.
         if not os.path.exists("index.html"):
-            st.error("Missing index.html. Ensure all files are uploaded to the root.")
+            st.error("Missing index.html. Ensure all files are in the root directory.")
             return
 
-        with open("index.html", "r", encoding="utf-8") as f:
-            html = f.read()
-
-        # Injects the key into the browser environment
-        injection = f"""
-        <script>
-            window.process = {{
-                env: {{
-                    API_KEY: "{api_key}"
-                }}
-            }};
-        </script>
-        """
+        # Initialize the component. 
+        # The 'path' argument is the key: it enables the browser to see all files in this folder.
+        app_component = components.declare_component("tubemagic_hub", path=".")
         
-        # We replace <head> with <head> + our injection
-        html = html.replace("<head>", f"<head>{injection}")
-
-        # Render the dashboard in a large iframe
-        components.html(html, height=1200, scrolling=True)
+        # We still need to pass the API_KEY. We'll do this as a parameter to the component.
+        # The frontend will receive this via the 'args' prop or we can continue to inject 
+        # it into the environment if needed, but declare_component works differently.
+        # However, to keep it simple and consistent with your current setup, 
+        # we provide the key as a component argument.
+        app_component(api_key=api_key)
 
         if not api_key:
-            st.sidebar.error("⚠️ API Key missing. Add it to Streamlit Secrets.")
+            st.sidebar.warning("⚠️ API Key missing in Secrets. Some features may not work.")
 
     except Exception as e:
         st.error(f"Error initializing app: {str(e)}")
