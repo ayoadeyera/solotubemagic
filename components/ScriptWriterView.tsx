@@ -102,6 +102,9 @@ const ScriptWriterView: React.FC = () => {
       timestamp: Date.now(),
       wordCount: wordCount,
       estimatedMinutes: Math.ceil(wordCount / 150),
+      category: 'Script',
+      followUp: false,
+      notes: ''
     };
 
     const existingScriptsRaw = localStorage.getItem('tubemagic_saved_scripts');

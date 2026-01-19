@@ -19,6 +19,9 @@ export interface ScriptVersion {
   timestamp: number;
   wordCount: number;
   estimatedMinutes: number;
+  category?: 'Script' | 'Idea' | 'Research' | 'Niche';
+  notes?: string;
+  followUp?: boolean;
 }
 
 export interface KeywordResult {
