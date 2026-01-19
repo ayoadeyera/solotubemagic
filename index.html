@@ -11,17 +11,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden; }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background-color: #0f172a; 
+      color: #f8fafc; 
+      margin: 0; 
+      padding: 0; 
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
-    #root { min-height: 100vh; }
+    #root { min-height: 100vh; display: flex; flex-direction: column; }
   </style>
 
-  <!-- Load Babel for in-browser TSX transpilation -->
+  <!-- Load Babel Standalone for real-time TSX transpilation -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <!-- Import Map for Dependencies -->
+  <!-- Import Map for ESM Dependencies -->
   <script type="importmap">
 {
   "imports": {
@@ -36,12 +44,19 @@
 </script>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <div class="flex items-center justify-center h-screen">
+      <div class="text-center animate-pulse">
+        <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-slate-500 text-sm font-medium">Initializing TubeMagic Hub...</p>
+      </div>
+    </div>
+  </div>
 
   <!-- Streamlit Communication Bridge -->
   <script type="text/javascript">
     (function() {
-      // 1. Tell Streamlit we are ready
+      // 1. Tell Streamlit the component exists
       function sendReady() {
         window.parent.postMessage({
           type: "streamlit:componentReady",
@@ -49,42 +64,37 @@
         }, "*");
       }
 
-      // 2. Automatically update height so the app is visible
+      // 2. Adjust the iframe height dynamically
       function setHeight() {
-        const height = document.documentElement.scrollHeight || document.body.scrollHeight;
+        const height = document.getElementById('root').scrollHeight;
         window.parent.postMessage({
           type: "streamlit:setFrameHeight",
-          height: height
+          height: height > 500 ? height : 800
         }, "*");
       }
 
-      // Listen for Streamlit's render messages (to get API keys, etc.)
+      // Listen for data from Python
       window.addEventListener("message", (event) => {
         if (event.data.type === "streamlit:render") {
           const apiKey = event.data.args.api_key;
           if (apiKey) {
             window.process = { env: { API_KEY: apiKey } };
           }
-          // Always update height after a render
-          setTimeout(setHeight, 0);
+          // Update height whenever Streamlit re-renders us
+          setTimeout(setHeight, 100);
         }
       });
 
-      // Initial signaling
+      // Continuous sync for dynamic content
       sendReady();
-      // Keep height in sync
-      setInterval(setHeight, 500);
+      setInterval(setHeight, 1000);
     })();
   </script>
 
-  <!-- Load the App using Babel -->
-  <script type="text/babel" data-type="module">
+  <!-- Transpile and run the entry point -->
+  <script type="text/babel" data-type="module" data-presets="react,typescript">
     import React from 'react';
     import ReactDOM from 'react-dom/client';
-    
-    // We fetch the components manually because Babel standalone 
-    // needs to know how to resolve relative imports in a browser environment.
-    // For simplicity in this environment, we'll import the entry point.
     import App from './App.tsx';
 
     const rootElement = document.getElementById('root');
