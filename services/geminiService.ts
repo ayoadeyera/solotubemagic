@@ -3,8 +3,6 @@ import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { ChannelStyle, KeywordResult, NicheResult } from "../types";
 
 export class GeminiService {
-  // Constructor removed to ensure GoogleGenAI is instantiated right before making API calls with the freshest key.
-
   async generateScript(params: {
     topic: string;
     style: ChannelStyle;
@@ -56,7 +54,7 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Generate 10 viral YouTube video ideas for the "${niche}" niche. Include a catchy title and a brief hook for each.`,
+      contents: `Generate 10 viral YouTube video ideas for the "${niche}" niche. Include a catchy title and a brief hook for each. Return ONLY a valid JSON array.`,
       config: {
         responseMimeType: 'application/json',
         responseSchema: {
@@ -74,35 +72,34 @@ export class GeminiService {
       }
     });
     
-    return JSON.parse(response.text || '[]');
+    try {
+      return JSON.parse(response.text || '[]');
+    } catch {
+      return [];
+    }
   }
 
   async researchKeywords(seed: string): Promise<KeywordResult[]> {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: `Perform deep keyword research for "${seed}" using current 2024/2025 search trends. Find high-volume, low-competition keywords.`,
+      contents: `Perform deep keyword research for "${seed}" using current 2024/2025 search trends. Find high-volume, low-competition keywords. Respond in a JSON format array of objects with keys: keyword, volume, competition (Low/Medium/High), score (0-100).`,
       config: {
         tools: [{ googleSearch: {} }],
-        // Note: When using googleSearch, the model might include citations in groundingMetadata.
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              keyword: { type: Type.STRING },
-              volume: { type: Type.STRING },
-              competition: { type: Type.STRING },
-              score: { type: Type.NUMBER }
-            },
-            required: ['keyword', 'volume', 'competition', 'score']
-          }
-        }
+        thinkingConfig: { thinkingBudget: 2000 }
       }
     });
 
-    const results = JSON.parse(response.text || '[]');
+    let results: any[] = [];
+    const text = response.text || '';
+    try {
+      // Find JSON block if search tool injected raw text
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      results = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+    } catch (e) {
+      console.warn("Could not parse keyword JSON", e);
+    }
+
     const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
     const sources = chunks.map((c: any) => c.web).filter(Boolean);
 
@@ -113,28 +110,20 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: `Identify 5 high-RPM, trending YouTube niches within the "${category}" category for 2025. Include estimated RPM, growth trend, and specific video topic ideas.`,
+      contents: `Identify 5 high-RPM, trending YouTube niches within the "${category}" category for 2025. Include estimated RPM, growth trend, and specific video topic ideas. Return results as a JSON array.`,
       config: {
         tools: [{ googleSearch: {} }],
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              name: { type: Type.STRING },
-              rpm: { type: Type.STRING },
-              trend: { type: Type.STRING },
-              description: { type: Type.STRING },
-              topics: { type: Type.ARRAY, items: { type: Type.STRING } }
-            },
-            required: ['name', 'rpm', 'trend', 'description', 'topics']
-          }
-        }
+        thinkingConfig: { thinkingBudget: 2000 }
       }
     });
 
-    return JSON.parse(response.text || '[]');
+    try {
+      const text = response.text || '';
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      return jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+    } catch {
+      return [];
+    }
   }
 
   async generateThumbnailPrompt(scriptSummary: string): Promise<string> {

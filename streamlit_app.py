@@ -1,28 +1,30 @@
+
 import streamlit as st
 import streamlit.components.v1 as components
 import os
 
-# Configure the Streamlit page
+# 1. Page Configuration
 st.set_page_config(
     page_title="TubeMagic Hub",
     page_icon="🚀",
     layout="wide"
 )
 
-# Retrieve API Key from Streamlit Secrets
+# 2. Key Handling via Streamlit Secrets
+# Please add your key to the Streamlit Cloud Dashboard under 'Secrets'
+# API_KEY = "your_key_here"
 api_key = st.secrets.get("API_KEY", "")
 
-def load_app():
+def serve_app():
     try:
-        # Verify index.html exists in the same directory
         if not os.path.exists("index.html"):
-            st.error("Error: index.html not found in the root directory.")
+            st.error("Missing index.html. Ensure all files are uploaded to the root.")
             return
 
         with open("index.html", "r", encoding="utf-8") as f:
-            html_content = f.read()
+            html = f.read()
 
-        # Inject environment variables so the Gemini SDK can find the API Key
+        # Injects the key into the browser environment
         injection = f"""
         <script>
             window.process = {{
@@ -33,19 +35,17 @@ def load_app():
         </script>
         """
         
-        # Add injection right at the start of the head section
-        html_content = html_content.replace("<head>", f"<head>{injection}")
+        # We replace <head> with <head> + our injection
+        html = html.replace("<head>", f"<head>{injection}")
 
-        # Render the component
-        # We use height 100vh approximate (1000px) for the dashboard
-        components.html(html_content, height=1000, scrolling=True)
+        # Render the dashboard in a large iframe
+        components.html(html, height=1200, scrolling=True)
 
         if not api_key:
-            st.sidebar.warning("⚠️ No API_KEY found in Streamlit Secrets.")
-            st.sidebar.info("Add your key in 'Settings > Secrets' as: API_KEY = 'your_key'")
+            st.sidebar.error("⚠️ API Key missing. Add it to Streamlit Secrets.")
 
     except Exception as e:
-        st.error(f"Failed to load application: {str(e)}")
+        st.error(f"Error initializing app: {str(e)}")
 
 if __name__ == "__main__":
-    load_app()
+    serve_app()

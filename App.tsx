@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
-import { ToolType, ScriptVersion } from './types';
-import { ICONS } from './constants';
-import ScriptWriterView from './components/ScriptWriterView';
-import IdeaGeneratorView from './components/IdeaGeneratorView';
-import KeywordResearchView from './components/KeywordResearchView';
-import ThumbnailGeneratorView from './components/ThumbnailGeneratorView';
-import IdeasManagerView from './components/IdeasManagerView';
-import NicheExplorerView from './components/NicheExplorerView';
-import VoiceAssistantView from './components/VoiceAssistantView';
+import { ToolType } from './types.ts';
+import { ICONS } from './constants.tsx';
+import ScriptWriterView from './components/ScriptWriterView.tsx';
+import IdeaGeneratorView from './components/IdeaGeneratorView.tsx';
+import KeywordResearchView from './components/KeywordResearchView.tsx';
+import ThumbnailGeneratorView from './components/ThumbnailGeneratorView.tsx';
+import IdeasManagerView from './components/IdeasManagerView.tsx';
+import NicheExplorerView from './components/NicheExplorerView.tsx';
+import VoiceAssistantView from './components/VoiceAssistantView.tsx';
 
 const App: React.FC = () => {
   const [activeTool, setActiveTool] = useState<ToolType>(ToolType.SCRIPT_WRITER);
