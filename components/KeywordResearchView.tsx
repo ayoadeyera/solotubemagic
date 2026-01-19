@@ -61,7 +61,27 @@ const KeywordResearchView: React.FC = () => {
             ) : results.length > 0 ? (
               results.map((res, i) => (
                 <tr key={i} className="hover:bg-slate-800/30 transition-colors">
-                  <td className="px-6 py-4 font-medium text-indigo-400">{res.keyword}</td>
+                  <td className="px-6 py-4 font-medium text-indigo-400">
+                    <div className="flex flex-col gap-2">
+                      <span>{res.keyword}</span>
+                      {res.sources && res.sources.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {res.sources.map((src, idx) => (
+                            <a 
+                              key={idx} 
+                              href={src.uri} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="text-[8px] bg-slate-800/80 text-slate-500 px-1.5 py-0.5 rounded hover:text-indigo-400 border border-slate-700 transition-colors"
+                              title={src.title}
+                            >
+                              Source {idx + 1}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 text-slate-300">{res.volume}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
