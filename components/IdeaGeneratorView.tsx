@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { GeminiService } from '../services/geminiService';
+import { GeminiService } from '../services/geminiService.ts';
 
 const IdeaGeneratorView: React.FC = () => {
   const [niche, setNiche] = useState('');
@@ -48,11 +48,6 @@ const IdeaGeneratorView: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {ideas.map((idea, idx) => (
           <div key={idx} className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl hover:border-indigo-500/50 transition-all group relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
-               <button className="p-2 bg-indigo-600 rounded-lg">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-               </button>
-            </div>
             <span className="inline-block px-3 py-1 bg-indigo-600/10 text-indigo-400 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">Viral Concept #{idx + 1}</span>
             <h3 className="text-lg font-bold mb-2 text-slate-100 group-hover:text-indigo-400 transition-colors">{idea.title}</h3>
             <p className="text-slate-400 text-sm mb-4 leading-relaxed">{idea.description}</p>

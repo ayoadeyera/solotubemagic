@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { GeminiService } from '../services/geminiService';
-import { CHANNEL_PRESETS, LENGTH_OPTIONS } from '../constants';
-import { ChannelStyle, ScriptVersion } from '../types';
+import { GeminiService } from '../services/geminiService.ts';
+import { CHANNEL_PRESETS, LENGTH_OPTIONS } from '../constants.tsx';
+import { ChannelStyle, ScriptVersion } from '../types.ts';
 
 const ScriptWriterView: React.FC = () => {
   const [topic, setTopic] = useState('');
@@ -18,12 +18,10 @@ const ScriptWriterView: React.FC = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<ScriptVersion[]>([]);
   
-  // Track the root ID for the current session to group versions
   const rootIdRef = useRef<string>(crypto.randomUUID());
   const editorRef = useRef<HTMLDivElement>(null);
   const lastSavedContentRef = useRef<string>('');
 
-  // Load history for the current rootId whenever saved scripts change
   const refreshHistory = () => {
     const raw = localStorage.getItem('tubemagic_saved_scripts');
     if (raw) {
@@ -35,19 +33,15 @@ const ScriptWriterView: React.FC = () => {
     }
   };
 
-  // Auto-save logic
   useEffect(() => {
     const autoSaveInterval = setInterval(() => {
       const currentContent = editorRef.current?.innerHTML || '';
-      
-      // Only auto-save if content exists and has changed since last save
       if (currentContent && currentContent !== lastSavedContentRef.current && !loading) {
         performSave(true);
       }
-    }, 60000); // 60 seconds
-
+    }, 60000);
     return () => clearInterval(autoSaveInterval);
-  }, [loading, topic]); // Reset or re-evaluate when topic or loading state changes
+  }, [loading, topic]);
 
   useEffect(() => {
     refreshHistory();
@@ -57,7 +51,6 @@ const ScriptWriterView: React.FC = () => {
     if (!topic) return;
     setLoading(true);
     setSaveStatus('idle');
-    // New generation starts a new root history chain
     rootIdRef.current = crypto.randomUUID();
     lastSavedContentRef.current = '';
     try {
@@ -76,7 +69,7 @@ const ScriptWriterView: React.FC = () => {
       setHistory([]);
     } catch (error) {
       console.error(error);
-      alert('Generation failed. Please check your console.');
+      alert('Generation failed.');
     } finally {
       setLoading(false);
     }
@@ -120,7 +113,6 @@ const ScriptWriterView: React.FC = () => {
     setTimeout(() => {
       const now = new Date();
       const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-      
       if (isAuto) {
         setAutoSaveStatus('saved');
         setLastAutoSavedAt(timeStr);
@@ -170,7 +162,6 @@ const ScriptWriterView: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
-      {/* Configuration Column */}
       <div className="lg:col-span-4 space-y-6">
         <section className="bg-slate-900/50 p-6 rounded-2xl border border-slate-800 space-y-4">
           <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Main Details</h2>
@@ -253,7 +244,6 @@ const ScriptWriterView: React.FC = () => {
         </button>
       </div>
 
-      {/* Editor Column */}
       <div className="lg:col-span-8 flex flex-col h-full min-h-[600px] relative">
         <div className="flex-1 bg-slate-900/50 rounded-3xl border border-slate-800 overflow-hidden flex flex-col">
           <div className="px-6 py-4 border-b border-slate-800 bg-slate-900/80 flex items-center justify-between">
@@ -263,7 +253,6 @@ const ScriptWriterView: React.FC = () => {
                   <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
                   <span className="w-3 h-3 rounded-full bg-green-500"></span>
                </div>
-               {/* Draft/Auto-save Status Indicator */}
                {(autoSaveStatus !== 'idle' || lastAutoSavedAt) && (
                  <div className="flex items-center gap-2 animate-in fade-in duration-500">
                     <div className={`w-1.5 h-1.5 rounded-full ${autoSaveStatus === 'saving' ? 'bg-indigo-500 animate-pulse' : 'bg-emerald-500'}`}></div>
@@ -299,18 +288,13 @@ const ScriptWriterView: React.FC = () => {
             </div>
           </div>
           
-          {/* Rich Text Toolbar */}
           {!loading && script && (
             <div className="px-6 py-2 border-b border-slate-800 bg-slate-900/40 flex items-center gap-1">
-              <button onClick={() => execCommand('bold')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-300 transition-colors" title="Bold (Ctrl+B)">
+              <button onClick={() => execCommand('bold')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-300 transition-colors" title="Bold">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
               </button>
-              <button onClick={() => execCommand('italic')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-300 transition-colors italic" title="Italic (Ctrl+I)">
+              <button onClick={() => execCommand('italic')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-300 transition-colors italic" title="Italic">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
-              </button>
-              <div className="w-px h-4 bg-slate-800 mx-2"></div>
-              <button onClick={() => execCommand('insertUnorderedList')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-300 transition-colors" title="Bullet List">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
               </button>
             </div>
           )}
@@ -338,7 +322,6 @@ const ScriptWriterView: React.FC = () => {
                </div>
              )}
 
-             {/* History Slide-over Panel */}
              {showHistory && (
                <div className="absolute inset-y-0 right-0 w-72 bg-slate-900 border-l border-slate-800 shadow-2xl z-20 flex flex-col animate-in slide-in-from-right duration-300">
                   <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/50">
@@ -353,35 +336,23 @@ const ScriptWriterView: React.FC = () => {
                         <div key={v.id} className="group bg-slate-950/50 border border-slate-800 p-3 rounded-xl hover:border-indigo-500/50 transition-all">
                           <div className="flex justify-between items-start mb-1">
                             <span className="text-[10px] font-bold text-slate-500">{formatRelativeTime(v.timestamp)}</span>
-                            {idx === 0 && <span className="text-[8px] bg-indigo-600/20 text-indigo-400 px-1.5 py-0.5 rounded font-bold uppercase">Latest</span>}
                           </div>
-                          <p className="text-[10px] text-slate-400 mb-3">{v.wordCount} words • {v.estimatedMinutes}m read</p>
+                          <p className="text-[10px] text-slate-400 mb-3">{v.wordCount} words</p>
                           <button 
                             onClick={() => revertToVersion(v)}
                             className="w-full py-1.5 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-lg text-[10px] font-bold transition-all"
                           >
-                            Revert to this version
+                            Revert
                           </button>
                         </div>
                       ))
                     ) : (
-                      <div className="text-center py-12">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-2 text-slate-700"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        <p className="text-[10px] text-slate-600">No previous versions saved for this script yet.</p>
-                      </div>
+                      <p className="text-[10px] text-slate-600 text-center py-12">No history yet.</p>
                     )}
                   </div>
                </div>
              )}
           </div>
-        </div>
-        
-        {/* Interactive Bar */}
-        <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
-          <button className="whitespace-nowrap bg-slate-800/50 hover:bg-slate-800 border border-slate-800 px-4 py-2 rounded-xl text-xs font-medium text-slate-400 transition-colors">🔥 Add Viral Hook</button>
-          <button className="whitespace-nowrap bg-slate-800/50 hover:bg-slate-800 border border-slate-800 px-4 py-2 rounded-xl text-xs font-medium text-slate-400 transition-colors">⏱️ Optimize Pacing</button>
-          <button className="whitespace-nowrap bg-slate-800/50 hover:bg-slate-800 border border-slate-800 px-4 py-2 rounded-xl text-xs font-medium text-slate-400 transition-colors">💬 Check Conversational Tone</button>
-          <button className="whitespace-nowrap bg-slate-800/50 hover:bg-slate-800 border border-slate-800 px-4 py-2 rounded-xl text-xs font-medium text-slate-400 transition-colors">✅ Plagiarism Check</button>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { GeminiService } from '../services/geminiService';
-import { NicheResult } from '../types';
+import { GeminiService } from '../services/geminiService.ts';
+import { NicheResult } from '../types.ts';
 
 const NicheExplorerView: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -17,7 +17,7 @@ const NicheExplorerView: React.FC = () => {
       setResults(niches);
     } catch (error) {
       console.error(error);
-      alert("Deep scan failed. Market intelligence offline.");
+      alert("Deep scan failed.");
     } finally {
       setLoading(false);
     }
@@ -36,14 +36,14 @@ const NicheExplorerView: React.FC = () => {
       <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl overflow-hidden relative">
          <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-600/20 blur-[100px] rounded-full"></div>
          <h2 className="text-2xl font-bold mb-2">Market Intelligence</h2>
-         <p className="text-slate-400 text-sm max-w-lg mb-8">Analyze High-RPM (Revenue Per Mille) categories with real-time Google Search grounding.</p>
+         <p className="text-slate-400 text-sm max-w-lg mb-8">Analyze High-RPM categories with real-time Google Search grounding.</p>
          
          <div className="flex gap-3 mb-10 max-w-xl">
            <input
              type="text"
              value={query}
              onChange={(e) => setQuery(e.target.value)}
-             placeholder="Search category (e.g., Tech, Real Estate)..."
+             placeholder="Search category..."
              className="flex-1 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:ring-2 focus:ring-indigo-600"
            />
            <button
@@ -55,67 +55,26 @@ const NicheExplorerView: React.FC = () => {
            </button>
          </div>
 
-         {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
-               {[1,2,3].map(i => (
-                 <div key={i} className="bg-slate-950/50 h-40 border border-slate-800 rounded-2xl"></div>
-               ))}
-            </div>
-         ) : (
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-             {displayResults.map((n, i) => (
-               <div key={i} className="bg-slate-950/50 border border-slate-800 p-6 rounded-2xl hover:bg-slate-800/30 transition-all group animate-in fade-in slide-in-from-bottom-2 duration-500">
-                 <div className="flex justify-between items-start mb-4">
-                   <span className="text-sm font-bold text-indigo-400">{n.name}</span>
-                   <span className="text-[10px] bg-indigo-600/20 text-indigo-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">Verified</span>
-                 </div>
-                 <p className="text-[11px] text-slate-500 mb-6 leading-relaxed line-clamp-2">{n.description}</p>
-                 <div className="grid grid-cols-2 gap-4">
-                   <div>
-                     <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-widest">Est. RPM</span>
-                     <span className="text-lg font-bold text-slate-100">{n.rpm}</span>
-                   </div>
-                   <div>
-                     <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-widest">Growth</span>
-                     <span className={`text-lg font-bold ${n.trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>{n.trend}</span>
-                   </div>
-                 </div>
-                 {n.topics && n.topics.length > 0 && (
-                   <div className="mt-6 pt-4 border-t border-slate-800/50">
-                      <span className="text-[9px] text-slate-600 uppercase font-bold block mb-2">Viral Hooks:</span>
-                      <div className="flex flex-wrap gap-2">
-                        {n.topics.slice(0, 2).map((t, idx) => (
-                          <span key={idx} className="text-[9px] bg-slate-800 text-slate-400 px-2 py-1 rounded-lg truncate max-w-full">"{t}"</span>
-                        ))}
-                      </div>
-                   </div>
-                 )}
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           {displayResults.map((n, i) => (
+             <div key={i} className="bg-slate-950/50 border border-slate-800 p-6 rounded-2xl hover:bg-slate-800/30 transition-all group animate-in fade-in slide-in-from-bottom-2 duration-500">
+               <div className="flex justify-between items-start mb-4">
+                 <span className="text-sm font-bold text-indigo-400">{n.name}</span>
                </div>
-             ))}
-           </div>
-         )}
-      </div>
-
-      <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-3xl">
-        <h3 className="text-lg font-bold mb-4">Strategy Advisory</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-           <div className="space-y-4">
-              <div className="bg-indigo-600/10 border border-indigo-600/20 p-5 rounded-2xl">
-                 <h4 className="text-indigo-400 font-bold text-sm mb-2 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                    2025 Prediction
-                 </h4>
-                 <p className="text-xs text-slate-300 leading-relaxed">
-                    Personalized AI Automation is expected to be the highest growth niche. Channels focusing on "How to build your own agents" are seeing 4x RPMs compared to generic tech reviews.
-                 </p>
-              </div>
-           </div>
-           <div className="flex flex-col justify-center">
-              <p className="text-sm text-slate-500 italic">
-                 "Success in YouTube isn't about being first to a topic, it's about being the most grounded in data. Use Market Intelligence to find the gaps your competitors are missing."
-              </p>
-           </div>
-        </div>
+               <p className="text-[11px] text-slate-500 mb-6 leading-relaxed line-clamp-2">{n.description}</p>
+               <div className="grid grid-cols-2 gap-4">
+                 <div>
+                   <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-widest">Est. RPM</span>
+                   <span className="text-lg font-bold text-slate-100">{n.rpm}</span>
+                 </div>
+                 <div>
+                   <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-widest">Growth</span>
+                   <span className={`text-lg font-bold ${n.trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>{n.trend}</span>
+                 </div>
+               </div>
+             </div>
+           ))}
+         </div>
       </div>
     </div>
   );

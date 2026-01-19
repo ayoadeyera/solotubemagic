@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
-import { ChannelStyle, KeywordResult, NicheResult } from "../types";
+import { ChannelStyle, KeywordResult, NicheResult } from "../types.ts";
 
 export class GeminiService {
   async generateScript(params: {
@@ -30,13 +30,6 @@ export class GeminiService {
       2. Introduction: Introduce the topic and value proposition.
       3. Main Content: Broken down into engaging segments with pacing notes.
       4. Conclusion & Call to Action: Summarize and drive engagement.
-      
-      Writing Style Guidelines:
-      - Sound like an expert human YouTuber.
-      - Use conversational language.
-      - Add "Visual Pacing" cues in brackets [e.g., [Fast cut to B-roll of city]].
-      - Ensure high retention by using open loops and storytelling techniques.
-      ${inspiration?.length ? `Incorporate key insights from these sources: ${inspiration.join(', ')}` : ''}
     `;
 
     const response = await ai.models.generateContent({
@@ -83,7 +76,7 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: `Perform deep keyword research for "${seed}" using current 2024/2025 search trends. Find high-volume, low-competition keywords. Respond in a JSON format array of objects with keys: keyword, volume, competition (Low/Medium/High), score (0-100).`,
+      contents: `Perform deep keyword research for "${seed}" using current search trends. Respond in a JSON format array of objects with keys: keyword, volume, competition (Low/Medium/High), score (0-100).`,
       config: {
         tools: [{ googleSearch: {} }],
         thinkingConfig: { thinkingBudget: 2000 }
@@ -93,7 +86,6 @@ export class GeminiService {
     let results: any[] = [];
     const text = response.text || '';
     try {
-      // Find JSON block if search tool injected raw text
       const jsonMatch = text.match(/\[[\s\S]*\]/);
       results = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
     } catch (e) {
@@ -110,7 +102,7 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-preview',
-      contents: `Identify 5 high-RPM, trending YouTube niches within the "${category}" category for 2025. Include estimated RPM, growth trend, and specific video topic ideas. Return results as a JSON array.`,
+      contents: `Identify 5 high-RPM, trending YouTube niches within the "${category}" category. Return results as a JSON array.`,
       config: {
         tools: [{ googleSearch: {} }],
         thinkingConfig: { thinkingBudget: 2000 }
@@ -130,7 +122,7 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
      const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
-      contents: `Based on this script: "${scriptSummary.substring(0, 500)}", generate a highly descriptive prompt for an AI image generator to create a viral YouTube thumbnail. Focus on high contrast, facial expressions, cinematic lighting, and text-safe areas.`,
+      contents: `Generate a highly descriptive prompt for a viral YouTube thumbnail based on: "${scriptSummary.substring(0, 500)}".`,
     });
     return response.text || '';
   }
@@ -139,45 +131,28 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: {
-        parts: [{ text: prompt }]
-      },
-      config: {
-        imageConfig: {
-          aspectRatio: "16:9"
-        }
-      }
+      contents: { parts: [{ text: prompt }] },
+      config: { imageConfig: { aspectRatio: "16:9" } }
     });
 
     for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
-      }
+      if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
     }
     throw new Error('No image generated');
   }
 
   async generateDynamicThumbnail(prompt: string): Promise<string> {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    
     let operation = await ai.models.generateVideos({
       model: 'veo-3.1-fast-generate-preview',
       prompt: prompt,
-      config: {
-        numberOfVideos: 1,
-        resolution: '720p',
-        aspectRatio: '16:9'
-      }
+      config: { numberOfVideos: 1, resolution: '720p', aspectRatio: '16:9' }
     });
-
     while (!operation.done) {
       await new Promise(resolve => setTimeout(resolve, 10000));
       operation = await ai.operations.getVideosOperation({ operation: operation });
     }
-
     const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
-    if (!downloadLink) throw new Error("Video generation failed.");
-    
     const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
     const blob = await response.blob();
     return URL.createObjectURL(blob);
@@ -187,26 +162,13 @@ export class GeminiService {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const data = base64Data.split(',')[1];
     const mimeType = base64Data.split(';')[0].split(':')[1];
-    
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: {
-        parts: [
-          { inlineData: { data, mimeType } },
-          { text: prompt }
-        ]
-      },
-      config: {
-        imageConfig: {
-          aspectRatio: "16:9"
-        }
-      }
+      contents: { parts: [{ inlineData: { data, mimeType } }, { text: prompt }] },
+      config: { imageConfig: { aspectRatio: "16:9" } }
     });
-
     for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
-      }
+      if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
     }
     throw new Error('Image edit failed');
   }
