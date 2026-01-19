@@ -82,7 +82,8 @@ const VoiceAssistantView: React.FC = () => {
       outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
 
       const sessionPromise = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-09-2025',
+        // Updated model name to 'gemini-2.5-flash-native-audio-preview-12-2025' per coding guidelines.
+        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         callbacks: {
           onopen: () => {
             setIsActive(true);
