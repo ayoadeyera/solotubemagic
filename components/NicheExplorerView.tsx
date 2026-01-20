@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { GeminiService } from '../services/geminiService.ts';
 import { NicheResult } from '../types.ts';
@@ -23,10 +22,10 @@ const NicheExplorerView: React.FC = () => {
     }
   };
 
-  const defaultNiches = [
-    { name: 'Finance & Investing', rpm: '$15 - $30', trend: '+12%', description: 'Traditional finance pivot to crypto and tax hacks.', topics: [] },
-    { name: 'AI Software Reviews', rpm: '$12 - $20', trend: '+45%', description: 'Hyper-growth category driven by B2B SaaS adoption.', topics: [] },
-    { name: 'Health & Biohacking', rpm: '$8 - $18', trend: '+15%', description: 'Wearable tech and longevity protocols.', topics: [] },
+  const defaultNiches: NicheResult[] = [
+    { name: 'Finance & Investing', rpm: '$15 - $30', trend: '+12%', description: 'Traditional finance pivot to crypto and tax hacks.', topics: [], sources: [] },
+    { name: 'AI Software Reviews', rpm: '$12 - $20', trend: '+45%', description: 'Hyper-growth category driven by B2B SaaS adoption.', topics: [], sources: [] },
+    { name: 'Health & Biohacking', rpm: '$8 - $18', trend: '+15%', description: 'Wearable tech and longevity protocols.', topics: [], sources: [] },
   ];
 
   const displayResults = results.length > 0 ? results : (query ? [] : defaultNiches);
@@ -57,12 +56,12 @@ const NicheExplorerView: React.FC = () => {
 
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
            {displayResults.map((n, i) => (
-             <div key={i} className="bg-slate-950/50 border border-slate-800 p-6 rounded-2xl hover:bg-slate-800/30 transition-all group animate-in fade-in slide-in-from-bottom-2 duration-500">
+             <div key={i} className="bg-slate-950/50 border border-slate-800 p-6 rounded-2xl hover:bg-slate-800/30 transition-all group animate-in fade-in slide-in-from-bottom-2 duration-500 flex flex-col">
                <div className="flex justify-between items-start mb-4">
                  <span className="text-sm font-bold text-indigo-400">{n.name}</span>
                </div>
                <p className="text-[11px] text-slate-500 mb-6 leading-relaxed line-clamp-2">{n.description}</p>
-               <div className="grid grid-cols-2 gap-4">
+               <div className="grid grid-cols-2 gap-4 mb-4">
                  <div>
                    <span className="text-[10px] text-slate-500 block uppercase font-bold tracking-widest">Est. RPM</span>
                    <span className="text-lg font-bold text-slate-100">{n.rpm}</span>
@@ -72,6 +71,26 @@ const NicheExplorerView: React.FC = () => {
                    <span className={`text-lg font-bold ${n.trend.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>{n.trend}</span>
                  </div>
                </div>
+
+               {n.sources && n.sources.length > 0 && (
+                 <div className="mt-auto pt-4 border-t border-slate-800/50">
+                    <span className="text-[8px] text-slate-600 uppercase font-black block mb-2 tracking-tighter">Verified Sources</span>
+                    <div className="flex flex-wrap gap-1">
+                      {n.sources.map((src, idx) => (
+                        <a 
+                          key={idx} 
+                          href={src.uri} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="text-[8px] bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded text-slate-500 hover:text-indigo-400 transition-colors truncate max-w-[100px]"
+                          title={src.title}
+                        >
+                          Source {idx + 1}
+                        </a>
+                      ))}
+                    </div>
+                 </div>
+               )}
              </div>
            ))}
          </div>

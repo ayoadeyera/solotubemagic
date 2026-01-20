@@ -1,4 +1,3 @@
-
 export enum ToolType {
   SCRIPT_WRITER = 'SCRIPT_WRITER',
   IDEA_GENERATOR = 'IDEA_GENERATOR',
@@ -38,6 +37,7 @@ export interface NicheResult {
   trend: string;
   description: string;
   topics: string[];
+  sources?: { uri: string; title: string }[];
 }
 
 export type ChannelStyle = 'Luxury' | 'Travel' | 'Self-Help' | 'Custom';

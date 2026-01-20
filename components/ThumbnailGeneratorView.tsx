@@ -1,17 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
-import { GeminiService } from '../services/geminiService';
+import { GeminiService } from '../services/geminiService.ts';
 
-declare global {
-  interface AIStudio {
-    hasSelectedApiKey: () => Promise<boolean>;
-    openSelectKey: () => Promise<void>;
-  }
-
-  interface Window {
-    // Removed 'readonly' modifier to fix "All declarations of 'aistudio' must have identical modifiers" error.
-    aistudio: AIStudio;
-  }
+// Local interface definition to avoid global namespace conflicts in AI Studio
+interface AIStudioPlatform {
+  hasSelectedApiKey: () => Promise<boolean>;
+  openSelectKey: () => Promise<void>;
 }
 
 const ThumbnailGeneratorView: React.FC = () => {
@@ -36,6 +29,9 @@ const ThumbnailGeneratorView: React.FC = () => {
     "Applying high-retention color grading...",
     "Almost there... Adding final polish.",
   ];
+
+  // Access the AI Studio platform helpers via window casting to avoid TS errors
+  const getPlatform = (): AIStudioPlatform | undefined => (window as any).aistudio;
 
   useEffect(() => {
     let interval: any;
@@ -97,11 +93,15 @@ const ThumbnailGeneratorView: React.FC = () => {
 
   const handleGenerateDynamic = async () => {
     if (!desc) return;
-    // Check key selection using the Window augmentation
-    const hasKey = await window.aistudio.hasSelectedApiKey();
-    if (!hasKey) {
-      await window.aistudio.openSelectKey();
+    
+    const platform = getPlatform();
+    if (platform) {
+      const hasKey = await platform.hasSelectedApiKey();
+      if (!hasKey) {
+        await platform.openSelectKey();
+      }
     }
+    
     setLoading(true);
     setLoadingType('dynamic');
     try {
@@ -114,7 +114,8 @@ const ThumbnailGeneratorView: React.FC = () => {
       console.error(error);
       if (error.message?.includes("Requested entity was not found")) {
         alert("Session expired or API key issue. Please select your API key again.");
-        await window.aistudio.openSelectKey();
+        const platform = getPlatform();
+        if (platform) await platform.openSelectKey();
       } else {
         alert('Dynamic generation failed. Ensure you have a paid GCP project linked.');
       }

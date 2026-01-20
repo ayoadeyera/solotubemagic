@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import { ChannelStyle, KeywordResult, NicheResult } from "../types.ts";
 
@@ -109,13 +108,19 @@ export class GeminiService {
       }
     });
 
+    let results: NicheResult[] = [];
+    const text = response.text || '';
     try {
-      const text = response.text || '';
       const jsonMatch = text.match(/\[[\s\S]*\]/);
-      return jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+      results = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
     } catch {
-      return [];
+      results = [];
     }
+
+    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    const sources = chunks.map((c: any) => c.web).filter(Boolean);
+
+    return results.map(r => ({ ...r, sources }));
   }
 
   async generateThumbnailPrompt(scriptSummary: string): Promise<string> {
