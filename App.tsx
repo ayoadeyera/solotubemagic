@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ToolType } from './types.ts';
 import { ICONS } from './constants.tsx';
@@ -29,8 +28,8 @@ const App: React.FC = () => {
       {/* Sidebar */}
       <aside className={`bg-slate-900 border-r border-slate-800 transition-all duration-300 flex flex-col ${sidebarOpen ? 'w-64' : 'w-20'}`}>
         <div className="p-6 flex items-center gap-3 border-b border-slate-800">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-xl">T</div>
-          {sidebarOpen && <span className="font-bold text-lg tracking-tight">TubeMagic</span>}
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-xl">A</div>
+          {sidebarOpen && <span className="font-bold text-lg tracking-tight">AyoTubeMagic</span>}
         </div>
         
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
@@ -71,7 +70,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-4">
              <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700">
                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-               <span className="text-xs font-medium text-slate-400 uppercase tracking-widest">Live Engine</span>
+               <span className="text-xs font-medium text-slate-400 uppercase tracking-widest">AyoTube Engine</span>
              </div>
              <button className="bg-slate-800 p-2 rounded-full hover:bg-slate-700 transition-colors">
                <ICONS.Rocket className="w-4 h-4" />

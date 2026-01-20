@@ -1,6 +1,6 @@
 {
-  "name": "TubeMagic Hub",
-  "description": "A comprehensive AI-powered workstation for YouTube creators featuring high-retention script writing, keyword research, thumbnail generation, and channel optimization tools.",
+  "name": "AyoTubeMagic Hub",
+  "description": "Professional AI workstation for YouTube creators, optimized for high-retention content and dynamic thumbnail loops.",
   "requestFramePermissions": [
     "camera",
     "microphone"
